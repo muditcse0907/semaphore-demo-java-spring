@@ -4,32 +4,29 @@
 # https://aka.ms/yaml
 
 trigger:
-- fork-and-run
+- main
+
+strategy:
+  matrix:
+    jdk10_linux:
+      imageName: "ubuntu-16.04"
+      jdk_version: "1.10"
+    jdk11_windows:
+      imageName: "vs2017-win2016"
+      jdk_version: "1.11"
+  maxParallel: 2
 
 pool:
-  vmImage: ubuntu-latest
+  vmImage: $(imageName)
 
 steps:
-- script: echo Hello, world!
-  displayName: 'Run a one-line script'
-
-- script: |
-    echo Add other tasks to build, test, and deploy your project.
-    echo See https://aka.ms/yaml
-    pwd
-    uname -a
-    ls -lrt
-  displayName: 'Run a multi-line script'
-
-
-
 - task: Maven@3
   inputs:
-    mavenPomFile: 'pom.xml'
+    mavenPomFile: "pom.xml"
+    mavenOptions: "-Xmx3072m"
+    javaHomeOption: "JDKVersion"
+    jdkVersionOption: $(jdk_version)
+    jdkArchitectureOption: "x64"
     publishJUnitResults: true
-    testResultsFiles: '**/surefire-reports/TEST-*.xml'
-    javaHomeOption: 'JDKVersion'
-    mavenVersionOption: 'Default'
-    mavenAuthenticateFeed: false
-    effectivePomSkip: false
-    sonarQubeRunAnalysis: false
+    testResultsFiles: "**/TEST-*.xml"
+    goals: "package"
